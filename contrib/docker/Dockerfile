@@ -1,6 +1,6 @@
 ARG VERSION=0.6.1
 
-FROM debian:stable as downloader
+FROM debian:stable AS downloader
 
 ARG VERSION
 
@@ -8,29 +8,34 @@ RUN apt-get update && apt-get install -y curl
 RUN mkdir -p /app/x86 /app/arm64 /app/armv7 /app/extracted/x86 /app/extracted/arm64 /app/extracted/armv7
 
 
-COPY smartdns-x86_64-unknown-linux-musl  /app/x86/smartdns.tar.gz
-COPY smartdns-aarch64-unknown-linux-musl   /app/extracted/arm64
-COPY smartdns-aarch64-unknown-linux-musl /app/armv7/smartdns.tar.gz
+COPY ./smartdns-x86_64-unknown-linux-musl.tar.gz /app/x86/smartdns.tar.gz
+COPY ./smartdns-aarch64-unknown-linux-musl.tar.gz /app/arm64/smartdns.tar.gz
+COPY ./smartdns-aarch64-unknown-linux-musl.tar.gz /app/armv7/smartdns.tar.gz
 
-FROM alpine as base
+RUN tar -xvf /app/x86/smartdns.tar.gz -C /app/extracted/x86
+RUN tar -xvf /app/arm64/smartdns.tar.gz -C /app/extracted/arm64
+RUN tar -xvf /app/armv7/smartdns.tar.gz -C /app/extracted/armv7
+
+
+FROM alpine AS base
 
 WORKDIR /app
 RUN apk add bash
 COPY docker-entrypoint.sh /app/entrypoint.sh
-FROM base as amd64
+FROM base AS amd64
 
 COPY --from=downloader /app/extracted/x86/* /app/
 
-FROM base as armv7
+FROM base AS armv7
 
 COPY --from=downloader /app/extracted/armv7/* /app/
 
-FROM base as arm64
+FROM base AS arm64
 
 COPY --from=downloader /app/extracted/arm64/* /app/
 
 
-FROM ${TARGETARCH}${TARGETVARIANT} as final
+FROM ${TARGETARCH}${TARGETVARIANT} AS final
 
 
 EXPOSE 8000

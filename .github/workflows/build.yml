@@ -157,13 +157,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v4
-        with:
-          artifact-ids: smartdns-x86_64-unknown-linux-musl-${{ inputs.version || github.ref_name }},smartdns-arm-unknown-linux-musleabihf-${{ inputs.version || github.ref_name }},smartdns-aarch64-unknown-linux-musl-${{ inputs.version || github.ref_name }}
       - name: Rename artifacts
         run: |
-           mv smartdns-x86_64-unknown-linux-musl-* smartdns-x86_64-unknown-linux-musl
-           mv smartdns-arm-unknown-linux-musleabihf-* smartdns-arm-unknown-linux-musleabihf
-           mv smartdns-aarch64-unknown-linux-musl-* smartdns-aarch64-unknown-linux-musl
+           mv smartdns-x86_64-unknown-linux-musl-*/smartdns-x86_64-unknown-linux-musl-*.tar.gz smartdns-x86_64-unknown-linux-musl.tar.gz
+           mv smartdns-arm-unknown-linux-musleabihf-*/smartdns-arm-unknown-linux-musleabihf-*.tar.gz smartdns-arm-unknown-linux-musleabihf.tar.gz
+           mv smartdns-aarch64-unknown-linux-musl-*/smartdns-aarch64-unknown-linux-musl-*.tar.gz smartdns-aarch64-unknown-linux-musl.tar.gz
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
