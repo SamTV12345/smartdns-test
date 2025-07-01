@@ -141,7 +141,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build-docker:
-    if: false  # Disabled for now, enable when it is ready to use.
     name: Build Docker image
     runs-on: ubuntu-latest
     needs: build
@@ -157,6 +156,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: smartdns-x86_64-unknown-linux-musl-${{ inputs.version || github.ref_name }},smartdns-arm-unknown-linux-musleabihf-${{ inputs.version || github.ref_name }},smartdns-aarch64-unknown-linux-musl-${{ inputs.version || github.ref_name }}
+      - name: Rename artifacts
+        run: |
+           mv smartdns-x86_64-unknown-linux-musl-* smartdns-x86_64-unknown-linux-musl
+           mv smartdns-arm-unknown-linux-musleabihf-* smartdns-arm-unknown-linux-musleabihf
+           mv smartdns-aarch64-unknown-linux-musl-* smartdns-aarch64-unknown-linux-musl
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -166,4 +173,4 @@ jobs:
       - name: Build and push Docker image
         working-directory: ./contrib/docker
         run: |
-          docker buildx build --platform linux/amd64 --platform linux/arm64 --platform linux/arm/v7 --build-arg VERSION=${{ inputs.version }} -t ghcr.io/mokeyish/smartdns-rs:${{ inputs.version }} --push .
+          docker buildx build --platform linux/amd64 --platform linux/arm64 --platform linux/arm/v7 --build-arg VERSION=${{ inputs.version }} -t ghcr.io/mokeyish/smartdns-rs:${{ inputs.version }} --push ./contrib
